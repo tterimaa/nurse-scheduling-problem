@@ -10,6 +10,7 @@ flags.DEFINE_string('output_proto', '',
 flags.DEFINE_string('params', 'max_time_in_seconds:10.0',
                     'Sat solver parameters.')
 
+
 def negated_bounded_span(works, start, length):
     """Filters an isolated sub-sequence of variables assined to True.
   Extract the span of Boolean variables [start, start + length), negate them,
@@ -66,7 +67,37 @@ def add_soft_sequence_constraint(model, works, hard_min, hard_max):
             [works[i].Not() for i in range(start, start + hard_max + 1)])
     return cost_literals, cost_coefficients
 
-
+def add_soft_sum_constraint(model, works, hard_min, hard_max):
+    """Sum constraint with soft and hard bounds.
+  This constraint counts the variables assigned to true from works.
+  If forbids sum < hard_min or > hard_max.
+  Then it creates penalty terms if the sum is < soft_min or > soft_max.
+  Args:
+    model: the sequence constraint is built on this model.
+    works: a list of Boolean variables.
+    hard_min: any sequence of true variables must have a sum of at least
+      hard_min.
+    soft_min: any sequence should have a sum of at least soft_min, or a linear
+      penalty on the delta will be added to the objective.
+    min_cost: the coefficient of the linear penalty if the sum is less than
+      soft_min.
+    soft_max: any sequence should have a sum of at most soft_max, or a linear
+      penalty on the delta will be added to the objective.
+    hard_max: any sequence of true variables must have a sum of at most
+      hard_max.
+    max_cost: the coefficient of the linear penalty if the sum is more than
+      soft_max.
+    prefix: a base name for penalty variables.
+  Returns:
+    a tuple (variables_list, coefficient_list) containing the different
+    penalties created by the sequence constraint.
+  """
+    cost_variables = []
+    cost_coefficients = []
+    sum_var = model.NewIntVar(hard_min, hard_max, '')
+    # This adds the hard constraints on the sum.
+    model.Add(sum_var == sum(works))
+    return cost_variables, cost_coefficients
 
 def solve_shift_scheduling(params, output_proto):
     """Solves the shift scheduling problem."""
@@ -77,14 +108,18 @@ def solve_shift_scheduling(params, output_proto):
     #     (shift, hard_min, hard_max)
     shift_constraints = [
         # Shift lenght is 6-8h
-        (6, 8),
+        (7, 8),
+    ]
+
+    weekly_hour_constraints = [
+        (25, 30)
     ]
 
     customer_bookings = [
         # (d, h, b) == Day d, Hour h+1 (hours go from 0 to 11) has b bookings
-        (0, 0, 3), # Day 0, Hour 1 has 3 bookings
-        (1, 4, 2), # Day 1 Hour 5 has 2 bookings
-        (3, 1, 2), # Day 3 Hour 2 has 2 bookings
+        (0, 0, 3),  # Day 0, Hour 1 has 3 bookings
+        (1, 4, 2),  # Day 1 Hour 5 has 2 bookings
+        (3, 1, 2),  # Day 3 Hour 2 has 2 bookings
     ]
 
     model = cp_model.CpModel()
@@ -104,8 +139,9 @@ def solve_shift_scheduling(params, output_proto):
         for e in range(num_employees):
             for d in range(num_days):
                 works = [work[e, d, h] for h in range(num_hours)]
-                variables, coeffs = add_soft_sequence_constraint(model, works, hard_min, hard_max)
-    
+                variables, coeffs = add_soft_sequence_constraint(
+                    model, works, hard_min, hard_max)
+
     # Booking constraints
     for booking in customer_bookings:
         d, h, bookings = booking
@@ -113,6 +149,16 @@ def solve_shift_scheduling(params, output_proto):
         for e in range(num_employees):
             workingEmployees.append(work[(e, d, h)])
         model.Add(sum(workingEmployees) >= bookings)
+
+    # Weekly hour constraints
+    for ct in weekly_hour_constraints:
+        hard_min, hard_max = ct
+        for e in range(num_employees):
+            totalHours = []
+            for d in range(num_days):
+                for h in range(num_hours):
+                    totalHours.append(work[(e, d, h)])
+            add_soft_sum_constraint(model, totalHours, hard_min, hard_max)
 
     # At least one employee works any given hour any given day
     for d in range(num_days):
@@ -132,21 +178,32 @@ def solve_shift_scheduling(params, output_proto):
     # Print solution.
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
         for d in range(num_days):
-            print('\nDAY %i' % d)                 
-            header = '          '   
+            print('\nDAY %i' % d)
+            header = '          '
             header += '1  2  3  4  5  6  7  8  9  10 11 12'
-            print(header)           
+            print(header)
             for e in range(num_employees):
-                schedule = ''       
+                schedule = ''
                 for h in range(num_hours):
                     if solver.BooleanValue(work[(e, d, h)]):
                         schedule += 'X' + '  '
-                    else:           
+                    else:
                         schedule += '.' + '  '
                 print('worker %i: %s' % (e, schedule))
 
+        print('\n')
+        for e in range(num_employees):
+            hours = 0
+            for d in range(num_days):
+                for h in range(num_hours):
+                    if solver.BooleanValue(work[((e, d, h))]):
+                        hours += 1
+            print('Employee %i worked %i hours' % (e, hours))
+
+
 def main(_=None):
     solve_shift_scheduling(FLAGS.params, FLAGS.output_proto)
+
 
 if __name__ == '__main__':
     app.run(main)
