@@ -81,41 +81,46 @@ def solve_shift_scheduling(params, output_proto):
     ]
 
     customer_bookings = [
-        # (n, b) == Hour n+1 (hours go from 0 to 11) has b bookings
-        (0, 3), # First hour has 3 bookings
-        (4, 2), # Fifth hour has 2 bookings
+        # (d, h, b) == Day d, Hour h+1 (hours go from 0 to 11) has b bookings
+        (0, 0, 3), # Day 0, Hour 1 has 3 bookings
+        (1, 4, 2), # Day 1 Hour 5 has 2 bookings
+        (3, 1, 2), # Day 3 Hour 2 has 2 bookings
     ]
 
     model = cp_model.CpModel()
 
+    num_days = 5
     num_hours = 12
 
     work = {}
     for e in range(num_employees):
-        for h in range(num_hours):
-            work[e, h] = model.NewBoolVar('work%i_%i' % (e, h))
+        for d in range(num_days):
+            for h in range(num_hours):
+                work[e, d, h] = model.NewBoolVar('work%i_%i_%i' % (e, d, h))
 
     # Shift constraints
     for ct in shift_constraints:
         hard_min, hard_max = ct
         for e in range(num_employees):
-            works = [work[e, h] for h in range(num_hours)]
-            variables, coeffs = add_soft_sequence_constraint(model, works, hard_min, hard_max)
+            for d in range(num_days):
+                works = [work[e, d, h] for h in range(num_hours)]
+                variables, coeffs = add_soft_sequence_constraint(model, works, hard_min, hard_max)
     
     # Booking constraints
     for booking in customer_bookings:
-        h, bookings = booking
+        d, h, bookings = booking
         workingEmployees = []
         for e in range(num_employees):
-            workingEmployees.append(work[(e, h)])
+            workingEmployees.append(work[(e, d, h)])
         model.Add(sum(workingEmployees) >= bookings)
 
-    # At least one employee works any given hour.
-    for h in range(num_hours):
-        assignments = []
-        for e in range(num_employees):
-            assignments.append(work[(e, h)])
-        model.AddAtLeastOne(assignments)
+    # At least one employee works any given hour any given day
+    for d in range(num_days):
+        for h in range(num_hours):
+            assignments = []
+            for e in range(num_employees):
+                assignments.append(work[(e, d, h)])
+            model.AddAtLeastOne(assignments)
 
     # Solve the model.
     solver = cp_model.CpSolver()
@@ -126,18 +131,19 @@ def solve_shift_scheduling(params, output_proto):
 
     # Print solution.
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
-        print()
-        header = '          '
-        header += '1  2  3  4  5  6  7  8  9  10 11 12'
-        print(header)
-        for e in range(num_employees):
-            schedule = ''
-            for h in range(num_hours):
-                if solver.BooleanValue(work[(e, h)]):
-                    schedule += 'X' + '  '
-                else:
-                    schedule += '.' + '  '
-            print('worker %i: %s' % (e, schedule))
+        for d in range(num_days):
+            print('\nDAY %i' % d)                 
+            header = '          '   
+            header += '1  2  3  4  5  6  7  8  9  10 11 12'
+            print(header)           
+            for e in range(num_employees):
+                schedule = ''       
+                for h in range(num_hours):
+                    if solver.BooleanValue(work[(e, d, h)]):
+                        schedule += 'X' + '  '
+                    else:           
+                        schedule += '.' + '  '
+                print('worker %i: %s' % (e, schedule))
 
 def main(_=None):
     solve_shift_scheduling(FLAGS.params, FLAGS.output_proto)
