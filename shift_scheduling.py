@@ -1,15 +1,10 @@
 from absl import app
 from absl import flags
+from typing import List
+import sys
 
 from google.protobuf import text_format
 from ortools.sat.python import cp_model
-
-FLAGS = flags.FLAGS
-flags.DEFINE_string('output_proto', '',
-                    'Output file to write the cp_model proto to.')
-flags.DEFINE_string('params', 'max_time_in_seconds:10.0',
-                    'Sat solver parameters.')
-
 
 def negated_bounded_span(works, start, length):
     """Filters an isolated sub-sequence of variables assined to True.
@@ -150,15 +145,9 @@ def add_soft_sum_constraint(model, works, hard_min, soft_min, min_cost,
 
     return cost_variables, cost_coefficients
 
-
-def solve_shift_scheduling(params, output_proto):
+def solve_shift_scheduling(num_employees: int, num_days: int, num_hours: int, customer_bookings: List[tuple[int, int, int]]):
     """Solves the shift scheduling problem."""
     model = cp_model.CpModel()
-
-    # Data
-    num_employees = 4
-    num_days = 5
-    num_hours = 12
 
     # Hour constraints on continuous hours
     shift_constraints = [
@@ -170,13 +159,6 @@ def solve_shift_scheduling(params, output_proto):
     weekly_hour_constraints = [
         # (hard_min, soft_min, min_cost, soft_max, hard_max, max_cost)
         (20, 25, 1, 27, 35, 1)
-    ]
-
-    customer_bookings = [
-        # (day, hour, number of bookings)
-        (0, 0, 3), 
-        (1, 4, 2),
-        (3, 1, 2),
     ]
 
     # Linear terms of the objective in a minimization context.
@@ -239,8 +221,6 @@ def solve_shift_scheduling(params, output_proto):
 
     # Solve the model.
     solver = cp_model.CpSolver()
-    if params:
-        text_format.Parse(params, solver.parameters)
     solution_printer = cp_model.ObjectiveSolutionPrinter()
     status = solver.Solve(model, solution_printer)
 
@@ -270,7 +250,19 @@ def solve_shift_scheduling(params, output_proto):
             print('Employee %i worked %i hours' % (e, hours))
 
 def main(_=None):
-    solve_shift_scheduling(FLAGS.params, FLAGS.output_proto)
+    num_employees = int(sys.argv[1])
+    num_days = int(sys.argv[2])
+    num_hours = int(sys.argv[3])
+    customer_bookings = sys.argv[4]
+    print("Arguments", sys.argv)
+
+    customer_bookings_array = list(map(int, customer_bookings.split(",")))
+    print(customer_bookings_array)
+
+    customer_bookings_tuple_array = [tuple(customer_bookings_array[i:i+3]) for i in range(0, len(customer_bookings_array), 3)]
+    print(customer_bookings_tuple_array)
+
+    solve_shift_scheduling(num_employees, num_days, num_hours, customer_bookings_tuple_array)
 
 if __name__ == '__main__':
     app.run(main)
