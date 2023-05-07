@@ -8,8 +8,9 @@ Copied from: https://developers.google.com/optimization/scheduling/employee_sche
 - Availability
 - Part-time employees
 
-# How to run
+# How to run (macos)
 ```
-python -m pip install --upgrade --user ortools
-python template.py
+python3 -m pip install ortools
+python3 -m pip install absl-py
+python3 template.py
 ```
