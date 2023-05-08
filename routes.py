@@ -17,6 +17,9 @@ def endpoint():
     customer_bookings = [(0,0,3)]
     success, res = solve_shift_scheduling(num_employees, num_days, num_hours, customer_bookings)
 
+    if success == False:
+        return jsonify({'status': 400, 'message': 'Processing the request took too long: check parameters'})
+
     return jsonify({'status': 200, 'message': 'OK', 'res': res})
 
 if __name__ == '__main__':

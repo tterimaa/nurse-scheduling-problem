@@ -222,13 +222,16 @@ def solve_shift_scheduling(num_employees: int, num_days: int, num_hours: int, cu
     # Solve the model.
     solver = cp_model.CpSolver()
     solution_printer = cp_model.ObjectiveSolutionPrinter()
+    solver.parameters.max_time_in_seconds = 5
     status = solver.Solve(model, solution_printer)
 
     res = dict()
     res["employees"] = []
+    solution_found = False
 
     # Print solution.
     if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        solution_found = True
         for d in range(num_days):
             print('\nDAY %i' % (d+1))
             header = '          '
@@ -253,7 +256,7 @@ def solve_shift_scheduling(num_employees: int, num_days: int, num_hours: int, cu
             print('Employee %i worked %i hours' % (e, hours))
             res["employees"].append({e: hours})
 
-    return (True, res)
+    return (solution_found, res)
 
 def main(_=None):
     num_employees = int(sys.argv[1])
