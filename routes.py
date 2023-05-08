@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from shift_scheduling import solve_shift_scheduling
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/echo', methods=['POST'])
 def echo():

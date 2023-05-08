@@ -1,0 +1,29 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Employee Schedule</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <form id="form">
+      <label for="num-employees">Number of Employees:</label>
+      <input type="number" id="num-employees" name="num_employees" value=3>
+
+      <label for="num-days">Number of Days:</label>
+      <input type="number" id="num-days" name="num_days" value=5>
+
+      <label for="num-hours">Number of Hours:</label>
+      <input type="number" id="num-hours" name="num_hours" value=12>
+
+      <button type="submit">Generate Schedule</button>
+    </form>
+
+    <div id="loader"></div>
+    <div id="results"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+

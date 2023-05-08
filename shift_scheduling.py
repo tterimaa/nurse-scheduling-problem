@@ -227,6 +227,7 @@ def solve_shift_scheduling(num_employees: int, num_days: int, num_hours: int, cu
 
     res = dict()
     res["employees"] = []
+    res["days"] = []
     solution_found = False
 
     # Print solution.
@@ -237,14 +238,19 @@ def solve_shift_scheduling(num_employees: int, num_days: int, num_hours: int, cu
             header = '          '
             header += '8  9  10 11 12 13 14 15 16 17 18 19'
             print(header)
+            workers = []
             for e in range(num_employees):
                 schedule = ''
+                hours = []
                 for h in range(num_hours):
                     if solver.BooleanValue(work[(e, d, h)]):
                         schedule += 'X' + '  '
+                        hours.append(h)
                     else:
                         schedule += '.' + '  '
                 print('worker %i: %s' % (e, schedule))
+                workers.append({"id": e, "hours": hours})
+            res["days"].append({"id": d, "workers": workers})
 
         print('\n')
         for e in range(num_employees):
