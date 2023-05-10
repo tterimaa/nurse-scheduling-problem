@@ -1,4 +1,3 @@
-
 const form = document.querySelector('form');
 form.addEventListener('submit', handleSubmit);
 
@@ -9,7 +8,13 @@ async function handleSubmit(event) {
   const resultsDiv = document.querySelector('#results');
   resultsDiv.innerHTML = '';
 
-  resultsDiv.innerHTML += '<p>Loading...</p>';
+  // Show loader animation
+  const juhaMietoImg = document.createElement('img');
+  juhaMietoImg.classList.add('mietaa');
+  juhaMietoImg.src = '../mietaa.jpg';
+  juhaMietoImg.alt = 'Juha Mieto';
+  juhaMietoImg.classList.add('loadingImage');
+  resultsDiv.appendChild(juhaMietoImg);
 
   // Get form values
   const numEmployeesInput = document.querySelector('#num-employees');
@@ -42,7 +47,6 @@ async function handleSubmit(event) {
     });
     const data = await response.json();
 
-    // Remove Juha Mieto's image and favorite food after the response is received
     resultsDiv.innerHTML = '';
 
     // Display days and grids
