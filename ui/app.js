@@ -1,6 +1,74 @@
 const form = document.querySelector('form');
 form.addEventListener('submit', handleSubmit);
+const tableContainerId = "table-container"
 
+window.onload = function() {
+  checkCondition();
+  generateTable();
+}
+
+function isFieldsFilled() {
+  var num_employees = document.getElementById("num-employees");
+  var num_days = document.getElementById("num-days");
+  var num_hours = document.getElementById("num-hours");
+  return num_employees.value !== "" && num_days.value !== "" && num_hours.value !== "";
+}
+
+// Check if forms basic fields have values first
+function checkCondition() {
+  var conditionalInput = document.querySelectorAll('.conditional');
+  if (isFieldsFilled()) {
+    conditionalInput.forEach(function (element) {
+      element.classList.remove("hidden");
+    });
+    generateTable();
+  } else {
+    conditionalInput.forEach(function (element) {
+      element.classList.add("hidden");
+    });
+    destroyTable();
+  }
+}
+
+// When basic fields have values, the table input should be displayed
+function generateTable() {
+    if (!isFieldsFilled()) return;
+
+    var numDays = parseInt(document.getElementById("num-days").value);
+    var numHours = parseInt(document.getElementById("num-hours").value);
+    var tableContainer = document.getElementById(tableContainerId);
+
+    var tableHTML = '<table>';
+
+    for (var i = 0; i < numDays + 1; i++) {
+        tableHTML += '<tr>';
+
+        for (var j = 0; j < numHours + 1; j++) {
+            if (i === 0 && j === 0) {
+                tableHTML += '<td></td>'; // Empty cell at the top-left corner
+            } else if (i === 0) {
+                tableHTML += '<td>' + j + '</td>'; // Column headers
+            } else if (j === 0) {
+                tableHTML += '<td>' + i + '</td>'; // Row headers
+            } else {
+                tableHTML += '<td><input type="number" data-row="' + i + '" data-col="' + j + '"></td>'; // Input fields
+            }
+        }
+
+        tableHTML += '</tr>';
+    }
+
+    tableHTML += '</table>';
+
+    tableContainer.innerHTML = tableHTML;
+}
+
+function destroyTable() {
+  var tableContainer = document.getElementById(tableContainerId);
+  tableContainer.innerHTML = "";
+}
+
+// Handle form submit
 async function handleSubmit(event) {
   event.preventDefault();
 

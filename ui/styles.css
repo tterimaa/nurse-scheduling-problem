@@ -4,15 +4,19 @@ body {
 
 body, button {
   font-family: 'IBM Plex Mono', sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   color: #333333;
   background-color: #F9FAFB;
 }
 
-#form-container {
+#conditional-container {
+  margin: 20px;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  max-width: 600px;
 }
+
 
 .day-grid {
   border-collapse: collapse;
@@ -32,11 +36,21 @@ body, button {
   background-color: #ccc;
 }
 
-#form {
+.hidden {
+  display: none;
+}
+
+#inputs-container {
   display: grid;
   gap: 10px;
   max-width: 500px;
   grid-template-columns: 1.2fr 1fr;
+}
+
+#form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #form label {
@@ -58,10 +72,11 @@ body, button {
 #form button[type="submit"] {
   background-color: #6C757D;
   color: #FFFFFF;
+  margin: 20px;
   padding: 10px;
+  max-width: 200px;
   border: none;
   cursor: pointer;
-  grid-column: 2;
 }
 
 #form button[type="submit"]:hover {
