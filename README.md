@@ -8,6 +8,12 @@ Copied from: https://developers.google.com/optimization/scheduling/employee_sche
 - Availability
 - Part-time employees
 
+# BUGS
+- customer_bookings = [(0,0,3)] currently leaves empty hour for for worker 2 on day 1. (emplyoees: 3, days: 5, hours: 12)
+  - Not actually bug but a 'feature'. Having first 3 hours work, one hour break and then rest of the day work does not violate the model if minimum number of
+  continous hours is 3
+  - We need a rule that prevents splitted days?
+
 # How to run (macos)
 ```
 python3 -m pip install ortools
