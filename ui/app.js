@@ -92,6 +92,24 @@ async function handleSubmit(event) {
   const numDays = parseInt(numDaysInput.value);
   const numHours = parseInt(numHoursInput.value);
 
+  const customerBookings = [];
+
+  // Get customer bookings
+  for (var i = 1; i < numDays + 1; i++) {
+
+    for (var j = 1; j < numHours + 1; j++) {
+      var input = document.querySelector('input[data-row="' + i + '"][data-col="' + j + '"]');
+      if (input.value !== "") {
+        const booking = {
+          day: i-1,
+          hour: j-1,
+          bookings: input.value, 
+        }
+        customerBookings.push(booking);
+      }
+    }
+  }
+
   // Validate form values
   if (!Number.isInteger(numEmployees) || numEmployees <= 0) {
     alert('Number of employees must be a positive integer');
@@ -111,7 +129,7 @@ async function handleSubmit(event) {
     const response = await fetch('http://localhost:5000/endpoint', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ num_employees: numEmployees, num_days: numDays, num_hours: numHours }),
+      body: JSON.stringify({ num_employees: numEmployees, num_days: numDays, num_hours: numHours, customer_bookings: customerBookings }),
     });
     const data = await response.json();
 
