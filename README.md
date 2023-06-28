@@ -15,11 +15,20 @@ Copied from: https://developers.google.com/optimization/scheduling/employee_sche
   - We need a rule that prevents splitted days?
 
 # How to run (macos)
+
+### Install dependencies
 ```
-python3 -m pip install ortools
-python3 -m pip install absl-py
+python3 -m pip install -r requirements.txt
+```
+### Run shift_scheduling.py from command line
+```
 python3 shift_scheduling.py 4 5 12 0,0,3,1,4,2,3,1,2
 ```
+### Run API and use UI
+```
+python3 routes.py
+```
+Open ui/index.html
 
 # CLI parameters
 shift_scheduling.py takes three parameters
