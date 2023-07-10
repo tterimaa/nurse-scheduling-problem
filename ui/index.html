@@ -1,34 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Employee Schedule</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-      <form id="form">
-        <div id="inputs-container">
+    <form id="form">
+      <fieldset>
+        <legend>Employees information</legend>
+        <p>
           <label for="num-employees">Number of employees:</label>
-          <input type="number" id="num-employees" name="num_employees" value=3 onkeyup="checkCondition()">
-
+          <input
+            type="number"
+            id="num-employees"
+            name="num_employees"
+            value="3"
+            onchange="addEmployeeInfoInputs()"
+          />
+        </p>
+        <ul id="employees-info-list" class="hidden"></ul>
+      </fieldset>
+      <fieldset>
+        <legend>Business hours</legend>
+        <p>
           <label for="num-days">Number of days:</label>
-          <input type="number" id="num-days" name="num_days" value=5 onkeyup="checkCondition()">
-
+          <input
+            type="number"
+            id="num-days"
+            name="num_days"
+            value="5"
+          />
+        </p>
+        <p>
           <label for="num-hours">Number of hours:</label>
-          <input type="number" id="num-hours" name="num_hours" value=12 onkeyup="checkCondition()">
-        </div>
-
-
-        <div id="conditional-container" class="conditional hidden">
-          <div id="table-container"></div>
-          <button type="submit" class="conditional hidden">Generate schedule</button>
-        </div>
-      </form>
+          <input
+            type="number"
+            id="num-hours"
+            name="num_hours"
+            value="12"
+          />
+        </p>
+      </fieldset>
+      <fieldset>
+        <legend>Customer bookings</legend>
+        <p>
+          <label for="num-bookings">Number of customer bookings during the week:</label>
+          <input
+            type="number"
+            id="num-bookings"
+            name="num_bookings"
+            value="3"
+            onchange="addCustomerBookingInputs()"
+          />
+        </p>
+        <ul id="customer-bookings-list" class="hidden"></ul>
+      </fieldset>
+      <button type="submit">Generate schedule</button>
+   </form>
 
     <div id="results"></div>
 
     <script src="app.js"></script>
   </body>
 </html>
-
