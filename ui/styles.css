@@ -1,5 +1,5 @@
 body {
-  margin: 50px;
+  margin: 30px;
 }
 
 body,
@@ -8,10 +8,6 @@ button {
   font-size: 16px;
   color: #333333;
   background-color: #f9fafb;
-}
-
-fieldset {
-  margin: 10px;
 }
 
 ul {
@@ -43,13 +39,13 @@ ul {
 }
 
 #form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 1000px;
+  margin: 0 auto;
 }
 
 #form fieldset {
-  width: 400px;
+  max-width: 500px;
+  margin: 5px auto;
 }
 
 #form label {
@@ -60,21 +56,21 @@ ul {
   height: 30px;
 }
 
-#form input[type="number"],
-#form button[type="submit"] {
+#form input[type="number"] {
   padding: 5px;
   width: 100%;
   box-sizing: border-box;
 }
 
 #form button[type="submit"] {
+  display: block;
   background-color: #6c757d;
   color: #ffffff;
-  margin: 20px;
   padding: 10px;
   max-width: 200px;
   border: none;
   cursor: pointer;
+  margin: 10px auto;
 }
 
 #form button[type="submit"]:hover {

@@ -106,12 +106,13 @@ async function handleSubmit(event) {
   resultsDiv.innerHTML = "";
 
   // Get form values
-  const numEmployeesInput = document.querySelector("#num-employees");
-  const numDaysInput = document.querySelector("#num-days");
-  const numHoursInput = document.querySelector("#num-hours");
-  const numEmployees = parseInt(numEmployeesInput.value);
-  const numDays = parseInt(numDaysInput.value);
-  const numHours = parseInt(numHoursInput.value);
+  const numEmployees = parseInt(document.querySelector("#num-employees").value);
+  const numDays = getNumDays();
+  const numHours = getNumHours();
+
+  if (!numDays || !numHours) {
+    return;
+  }
 
   // Get customer bookings
   var customer_bookings_list = document.getElementById("customer-bookings-list");
@@ -141,10 +142,6 @@ async function handleSubmit(event) {
   // Validate form values
   if (!Number.isInteger(numEmployees) || numEmployees <= 0) {
     alert("Number of employees must be a positive integer");
-    return;
-  }
-  if (!Number.isInteger(numDays) || numDays <= 0) {
-    alert("Number of days must be a positive integer");
     return;
   }
   if (!Number.isInteger(numHours) || numHours <= 0) {
@@ -200,7 +197,7 @@ async function handleSubmit(event) {
       day.workers.forEach((worker) => {
         const workerRow = document.createElement("tr");
         const idCell = document.createElement("td");
-        idCell.textContent = `Worker ${worker.id}`;
+        idCell.textContent = getEmployeeName(worker.id);
         workerRow.appendChild(idCell);
         for (let h = 0; h < numHours; h++) {
           const cell = document.createElement("td");
@@ -220,4 +217,35 @@ async function handleSubmit(event) {
   } catch (error) {
     console.error(error);
   }
+}
+
+function getEmployeeName(id) {
+  const name = document.getElementById('employee-name' + id).value;
+  if (!name) {
+    console.error('name not found')
+    return '';
+  }
+  return name;
+}
+
+function getNumDays() {
+  const from = parseInt(document.getElementById("from-day").value);
+  const to = parseInt(document.getElementById("to-day").value);
+  const num = to - from;
+  if (!num || num <= 0) {
+    alert('Error in opening hours: from date must be before to date')
+    return false;
+  }
+  return num;
+}
+
+function getNumHours() {
+  const from = parseInt(document.getElementById("from-hour").value);
+  const to = parseInt(document.getElementById("to-hour").value);
+  const num = to - from;
+  if (!num || num <= 0) {
+    alert('Error in opening hours: from hour must be less than to hour')
+    return false;
+  }
+  return num;
 }
