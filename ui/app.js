@@ -46,10 +46,13 @@ function addEmployeeInfoInputs() {
 
 function addCustomerBookingInputs() {
   var num_bookings = parseInt(document.getElementById("num-bookings").value);
-  var customer_bookings_list = document.getElementById("customer-bookings-list");
+  var customer_bookings_list = document.getElementById(
+    "customer-bookings-list",
+  );
   if (num_bookings > 0) {
     customer_bookings_list.classList.remove("hidden");
-    var currentList = customer_bookings_list.querySelectorAll("fieldset").length;
+    var currentList =
+      customer_bookings_list.querySelectorAll("fieldset").length;
     var diff = num_bookings - currentList;
     if (diff > 0) {
       for (var i = currentList; i < num_bookings; i++) {
@@ -115,26 +118,31 @@ async function handleSubmit(event) {
   }
 
   // Get customer bookings
-  var customer_bookings_list = document.getElementById("customer-bookings-list");
-  var customer_bookings_inputs = customer_bookings_list.querySelectorAll("input");
-  var customer_booking_input_values = Array.from(customer_bookings_inputs).map((b) => parseInt(b.value));
-  const isSomeBookingInvalid = customer_booking_input_values.some((b) => b < 0)
+  var customer_bookings_list = document.getElementById(
+    "customer-bookings-list",
+  );
+  var customer_bookings_inputs =
+    customer_bookings_list.querySelectorAll("input");
+  var customer_booking_input_values = Array.from(customer_bookings_inputs).map(
+    (b) => parseInt(b.value),
+  );
+  const isSomeBookingInvalid = customer_booking_input_values.some((b) => b < 0);
   if (isSomeBookingInvalid) {
     alert("Bookings values must be positive integers");
     return;
   }
   if (customer_booking_input_values.length % 3 !== 0) {
-      alert("Number of bookings must be divisable by three");
-      return;
+    alert("Number of bookings must be divisable by three");
+    return;
   }
   var customerBookings = [];
   var i = 0;
   while (i < customer_booking_input_values.length) {
     const booking = {
       day: customer_booking_input_values[i],
-      hour: customer_booking_input_values[i+1],
-      bookings: customer_booking_input_values[i+2], 
-    }
+      hour: customer_booking_input_values[i + 1],
+      bookings: customer_booking_input_values[i + 2],
+    };
     customerBookings.push(booking);
     i = i + 3;
   }
@@ -148,7 +156,6 @@ async function handleSubmit(event) {
     alert("Number of hours must be a positive integer");
     return;
   }
-
 
   // Show loader animation
   const juhaMietoImg = document.createElement("img");
@@ -189,7 +196,7 @@ async function handleSubmit(event) {
       headerRow.appendChild(idHeaderCell);
       for (let h = 0; h < numHours; h++) {
         const headerCell = document.createElement("th");
-        headerCell.textContent = `Hour ${h}`;
+        headerCell.textContent = getHour(h);
         headerRow.appendChild(headerCell);
       }
       dayGrid.appendChild(headerRow);
@@ -220,20 +227,41 @@ async function handleSubmit(event) {
 }
 
 function getEmployeeName(id) {
-  const name = document.getElementById('employee-name' + id).value;
+  const name = document.getElementById("employee-name" + id).value;
   if (!name) {
-    console.error('name not found')
-    return '';
+    console.error("name not found");
+    return "";
   }
   return name;
+}
+
+function getHour(id) {
+  const hour = document.getElementById("from-hour").querySelectorAll("option");
+  const startHour = document
+    .getElementById("from-hour")
+    .querySelector("[selected]");
+  if (!startHour || !startHour.value) {
+    console.error("start hour not found");
+    return "";
+  }
+  if (!hour || !hour[id]) {
+    console.error("hour not found");
+    return "";
+  }
+  const index = parseInt(hour[id].value) + parseInt(startHour.value);
+  if (!hour[index] || !hour[index].textContent) {
+    console.error("problem fetching text for the correct hour");
+    return "";
+  }
+  return hour[index].textContent;
 }
 
 function getNumDays() {
   const from = parseInt(document.getElementById("from-day").value);
   const to = parseInt(document.getElementById("to-day").value);
   const num = to - from;
-  if (!num || num <= 0) {
-    alert('Error in opening hours: from date must be before to date')
+  if (!num || num <= 0) {
+    alert("Error in opening hours: from date must be before to date");
     return false;
   }
   return num;
@@ -243,8 +271,8 @@ function getNumHours() {
   const from = parseInt(document.getElementById("from-hour").value);
   const to = parseInt(document.getElementById("to-hour").value);
   const num = to - from;
-  if (!num || num <= 0) {
-    alert('Error in opening hours: from hour must be less than to hour')
+  if (!num || num <= 0) {
+    alert("Error in opening hours: from hour must be less than to hour");
     return false;
   }
   return num;
