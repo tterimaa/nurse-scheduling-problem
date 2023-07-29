@@ -20,16 +20,13 @@ def endpoint():
         return jsonify({"error": "No JSON data received"})
 
     num_employees = data.get("num_employees")
-    num_days = data.get("num_days")
-    num_hours = data.get("num_hours")
+    days = data.get("days")
     customer_bookings_input = data.get("customer_bookings")
 
     print(customer_bookings_input)
     customer_bookings = list(map(map_function, customer_bookings_input))
     print(customer_bookings)
-    success, res = solve_shift_scheduling(
-        num_employees, num_days, num_hours, customer_bookings
-    )
+    success, res = solve_shift_scheduling(num_employees, days, customer_bookings)
 
     if success is False:
         return jsonify(
