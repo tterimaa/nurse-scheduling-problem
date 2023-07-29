@@ -15,10 +15,15 @@ def echo():
 @app.route("/endpoint", methods=["POST"])
 def endpoint():
     data = request.json
-    num_employees = data["num_employees"]
-    num_days = data["num_days"]
-    num_hours = data["num_hours"]
-    customer_bookings_input = data["customer_bookings"]
+
+    if not data:
+        return jsonify({"error": "No JSON data received"})
+
+    num_employees = data.get("num_employees")
+    num_days = data.get("num_days")
+    num_hours = data.get("num_hours")
+    customer_bookings_input = data.get("customer_bookings")
+
     print(customer_bookings_input)
     customer_bookings = list(map(map_function, customer_bookings_input))
     print(customer_bookings)
@@ -26,7 +31,7 @@ def endpoint():
         num_employees, num_days, num_hours, customer_bookings
     )
 
-    if success == False:
+    if success is False:
         return jsonify(
             {
                 "status": 400,
