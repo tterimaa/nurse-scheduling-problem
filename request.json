@@ -1,0 +1,30 @@
+{
+  "employees": [
+    {
+      "hours": 37,
+      "minutes": 30,
+      "vacationDays": [0, 3],
+      "constraints": ["startHour>12"] // format tdb
+    }
+  ],
+  "days": [
+    {
+      "startHour": 8,
+      "startMinute": 30,
+      "endHour": 20,
+      "endMinute": 30
+    },
+    {
+      "startHour": 8,
+      "startMinute": 30,
+      "endHour": 20,
+      "endMinute": 30
+    },
+    {
+      "startHour": 8,
+      "startMinute": 30,
+      "endHour": 20,
+      "endMinute": 30
+    }
+  ]
+}

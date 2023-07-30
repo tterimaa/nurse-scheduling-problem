@@ -2,9 +2,9 @@
 
 # TODO LIST
 
-- Assigning a nurse to a booking
+- Define start and end times for each day
+- More granular scheduling
 - Vacation days
-- Availability
 - Part-time employees
 
 # How to run (macos)
@@ -39,3 +39,7 @@ shift_scheduling.py takes three parameters
 4. customer_bookings (list of tuples) - the customer bookings
 
 - Customer bookings is a list of integers. List must be divisable by three: booking entry consist of three numbers: day, hour and number of bookings on a given hour
+
+### Run tests
+
+python3 -m unittest **tests**/test.py
