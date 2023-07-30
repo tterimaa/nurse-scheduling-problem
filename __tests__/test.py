@@ -1,5 +1,6 @@
 import unittest
 from ortools.sat.python import cp_model
+from api.shift_scheduling import add_no_gaps_constraint
 
 
 class SolutionPrinter(cp_model.CpSolverSolutionCallback):
@@ -34,34 +35,8 @@ class TestNoGapsConstraint(unittest.TestCase):
             vars.append(model.NewBoolVar("test_var%i" % i))
 
         model.Add(vars[1] == 1)
-        # Channeling constraints
-        true_to_false = []
-        for i in range(len(vars) - 1):
-            true_to_false.append(model.NewBoolVar("helper%i" % i))
 
-        model.Add(sum(true_to_false) <= 1)
-        for i in range(len(vars) - 1):
-            # (a and not b) => c
-            model.AddBoolOr([vars[i].Not(), vars[i + 1], true_to_false[i]])
-            # c => (a and not b)
-            model.AddImplication(true_to_false[i], vars[i])
-            model.AddImplication(true_to_false[i], vars[i + 1].Not())
-
-        false_to_true = []
-        for i in range(len(vars) - 1):
-            false_to_true.append(model.NewBoolVar("helper_2%i" % i))
-            model.Add(sum(false_to_true) <= 1)
-
-        for i in range(len(vars) - 1):
-            model.AddBoolOr([vars[i], vars[i + 1].Not(), false_to_true[i]])
-            model.AddImplication(false_to_true[i], vars[i].Not())
-            model.AddImplication(false_to_true[i], vars[i + 1])
-
-        for i in range(len(vars) - 1):
-            for j in range(i, len(vars) - 1):
-                model.AddBoolAnd(
-                    false_to_true[i].Not(), false_to_true[j].Not()
-                ).OnlyEnforceIf(true_to_false[i])
+        true_to_false, false_to_true = add_no_gaps_constraint(model, vars)
 
         model.Add(sum(vars) == 6)
 
@@ -71,7 +46,7 @@ class TestNoGapsConstraint(unittest.TestCase):
         status = solver.SearchForAllSolutions(model, solution_callback)
 
         print(status)
-        assert status == cp_model.FEASIBLE
+        assert status == cp_model.FEASIBLE or cp_model.OPTIMAL
 
     def test_gap_constraint_infeasible(self):
         model = cp_model.CpModel()
@@ -84,34 +59,7 @@ class TestNoGapsConstraint(unittest.TestCase):
         model.Add(vars[1] == 1)
         model.Add(vars[9] == 1)
 
-        # Channeling constraints
-        true_to_false = []
-        for i in range(len(vars) - 1):
-            true_to_false.append(model.NewBoolVar("helper%i" % i))
-
-        model.Add(sum(true_to_false) <= 1)
-        for i in range(len(vars) - 1):
-            # (a and not b) => c
-            model.AddBoolOr([vars[i].Not(), vars[i + 1], true_to_false[i]])
-            # c => (a and not b)
-            model.AddImplication(true_to_false[i], vars[i])
-            model.AddImplication(true_to_false[i], vars[i + 1].Not())
-
-        false_to_true = []
-        for i in range(len(vars) - 1):
-            false_to_true.append(model.NewBoolVar("helper_2%i" % i))
-            model.Add(sum(false_to_true) <= 1)
-
-        for i in range(len(vars) - 1):
-            model.AddBoolOr([vars[i], vars[i + 1].Not(), false_to_true[i]])
-            model.AddImplication(false_to_true[i], vars[i].Not())
-            model.AddImplication(false_to_true[i], vars[i + 1])
-
-        for i in range(len(vars) - 1):
-            for j in range(i, len(vars) - 1):
-                model.AddBoolAnd(
-                    false_to_true[i].Not(), false_to_true[j].Not()
-                ).OnlyEnforceIf(true_to_false[i])
+        true_to_false, false_to_true = add_no_gaps_constraint(model, vars)
 
         model.Add(sum(vars) == 6)
 

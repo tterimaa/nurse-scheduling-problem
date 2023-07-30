@@ -136,7 +136,7 @@ def add_soft_sum_constraint(
         cost_variables.append(excess)
         cost_coefficients.append(min_cost)
 
-   #  # Penalize sums above the soft_max target.
+    #  # Penalize sums above the soft_max target.
     if soft_max < hard_max and max_cost > 0:
         delta = model.NewIntVar(-len(works), len(works), "")
         model.Add(delta == sum_var - soft_max)
@@ -232,8 +232,7 @@ def solve_shift_scheduling(
                 soft_max,
                 hard_max,
                 max_cost,
-                "weekly_sum_constraint(employee %i, day %i, hour %i)"
-                % (e, i, h),
+                "weekly_sum_constraint(employee %i, day %i, hour %i)" % (e, i, h),
             )
             obj_int_vars.extend(variables)
             obj_int_coeffs.extend(coeffs)
@@ -246,6 +245,15 @@ def solve_shift_scheduling(
             for e in range(num_employees):
                 assignments.append(work[(e, i, h)])
             model.AddAtLeastOne(assignments)
+
+    # No gaps in the middle of a shift
+    for e in range(num_employees):
+        for i, d in enumerate(days):
+            hours = getHoursFromDict(d)
+            dailyHours = []
+            for h in range(hours):
+                dailyHours.append(work[(e, i, h)])
+            add_no_gaps_constraint(model, dailyHours)
 
     # Objective
     model.Minimize(
@@ -298,7 +306,41 @@ def solve_shift_scheduling(
             print("Employee %i worked %i hours" % (e, hours))
             res["employees"].append({e: hours})
 
+    print(solution_found)
     return (solution_found, res)
+
+
+def add_no_gaps_constraint(model, vars):
+    # Channeling constraints
+    true_to_false = []
+    for i in range(len(vars) - 1):
+        true_to_false.append(model.NewBoolVar("helper%i" % i))
+
+    model.Add(sum(true_to_false) <= 1)
+    for i in range(len(vars) - 1):
+        # (a and not b) => c
+        model.AddBoolOr([vars[i].Not(), vars[i + 1], true_to_false[i]])
+        # c => (a and not b)
+        model.AddImplication(true_to_false[i], vars[i])
+        model.AddImplication(true_to_false[i], vars[i + 1].Not())
+
+    false_to_true = []
+    for i in range(len(vars) - 1):
+        false_to_true.append(model.NewBoolVar("helper_2%i" % i))
+        model.Add(sum(false_to_true) <= 1)
+
+    for i in range(len(vars) - 1):
+        model.AddBoolOr([vars[i], vars[i + 1].Not(), false_to_true[i]])
+        model.AddImplication(false_to_true[i], vars[i].Not())
+        model.AddImplication(false_to_true[i], vars[i + 1])
+
+    for i in range(len(vars) - 1):
+        for j in range(i, len(vars) - 1):
+            model.AddBoolAnd(
+                false_to_true[i].Not(), false_to_true[j].Not()
+            ).OnlyEnforceIf(true_to_false[i])
+
+    return true_to_false, false_to_true
 
 
 def getHoursFromDict(day: Dict[DaysKey, int]):
