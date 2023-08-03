@@ -1,5 +1,5 @@
 from absl import app
-from typing import List, Literal, Dict
+from typing import List, Dict
 import sys
 import json
 from ortools.sat.python import cp_model
@@ -7,13 +7,10 @@ from ortools.sat.python import cp_model
 SHIFT_HARD_MIN = 3
 SHIFT_HARD_MAX = 10
 
-Day = Dict[Literal["hours", "minutes"], int]
-Employee = Dict[Literal["shift_constraints"], Dict[Literal["day", "max_hours"], int]]
-
 
 def solve_shift_scheduling(
-    employees: List[Employee],
-    days: List[Day],
+    employees: int,
+    days: List[Dict],
     customer_bookings: List[tuple[int, int, int]],
 ):
     """Solves the shift scheduling problem."""
@@ -32,7 +29,7 @@ def solve_shift_scheduling(
     obj_bool_coeffs = []
 
     work = {}
-    for e in range(len(employees)):
+    for e in range(employees):
         for i, d in enumerate(days):
             hours = get_hours(d)
             for h in range(hours):
@@ -40,17 +37,16 @@ def solve_shift_scheduling(
 
     # Shift constraints
     for i, d in enumerate(days):
-        for eIndex, e in enumerate(employees):
-            (
-                hard_min,
-                soft_min,
-                min_cost,
-                soft_max,
-                hard_max,
-                max_cost,
-            ), day = get_shift_constraints_for_employee(e, i)
+        for (
+            hard_min,
+            soft_min,
+            min_cost,
+            soft_max,
+            hard_max,
+            max_cost,
+        ), employee in get_shift_constraints_for_day(d, employees):
             hours = get_hours(d)
-            works = [work[eIndex, day, h] for h in range(hours)]
+            works = [work[employee, i, h] for h in range(hours)]
             variables, coeffs = add_soft_sequence_constraint(
                 model,
                 works,
@@ -60,7 +56,7 @@ def solve_shift_scheduling(
                 soft_max,
                 hard_max,
                 max_cost,
-                "shift_constraint(employee %i)" % eIndex,
+                "shift_constraint(employee %i)" % employee,
             )
             obj_bool_vars.extend(variables)
             obj_bool_coeffs.extend(coeffs)
@@ -69,14 +65,14 @@ def solve_shift_scheduling(
     for booking in customer_bookings:
         d, h, bookings = booking
         workingEmployees = []
-        for e in range(len(employees)):
+        for e in range(employees):
             workingEmployees.append(work[(e, d, h)])
         model.Add(sum(workingEmployees) >= bookings)
 
     # Weekly hour constraints
     for ct in weekly_hour_constraints:
         hard_min, soft_min, min_cost, soft_max, hard_max, max_cost = ct
-        for e in range(len(employees)):
+        for e in range(employees):
             totalHours = []
             for i, d in enumerate(days):
                 hours = get_hours(d)
@@ -101,12 +97,12 @@ def solve_shift_scheduling(
         hours = get_hours(d)
         for h in range(hours):
             assignments = []
-            for e in range(len(employees)):
+            for e in range(employees):
                 assignments.append(work[(e, i, h)])
             model.AddAtLeastOne(assignments)
 
     # No gaps in the middle of a shift
-    for e in range(len(employees)):
+    for e in range(employees):
         for i, d in enumerate(days):
             hours = get_hours(d)
             dailyHours = []
@@ -140,7 +136,7 @@ def solve_shift_scheduling(
             header += "8  9  10 11 12 13 14 15 16 17 18 19"
             print(header)
             workers = []
-            for e in range(len(employees)):
+            for e in range(employees):
                 schedule = ""
                 hours = []
                 hoursOfTheDay = get_hours(d)
@@ -155,7 +151,7 @@ def solve_shift_scheduling(
             res["days"].append({"id": d, "workers": workers})
 
         print("\n")
-        for e in range(len(employees)):
+        for e in range(employees):
             hours = 0
             for i, d in enumerate(days):
                 hoursOfTheDay = get_hours(d)
@@ -350,22 +346,27 @@ def get_hours(day: Day):
     return hours
 
 
-def get_shift_constraints_for_employee(e: Employee, d: int):
-    shift_constraints = (SHIFT_HARD_MIN, 6, 1, 0, SHIFT_HARD_MAX, 8)
-    day = d
-    constraint_settings = e.get("shift_constraints")
-    if constraint_settings is not None:
-        hard_max = constraint_settings.get("max_hours")
-        if not isinstance(hard_max, int):
-            hard_max = SHIFT_HARD_MAX
-        hard_min = min(SHIFT_HARD_MIN, hard_max)
-        # (hard_min, soft_min, min_cost, soft_max, hard_max, max_cost)
-        shift_constraints = (hard_min, 6, 1, 0, hard_max, 8)
-        day = constraint_settings.get("day")
-        if day is None:
-            day = d
+def get_shift_constraints_for_day(d: Dict, employees: int):
+    default_shift_constraint = (SHIFT_HARD_MIN, 6, 1, 0, SHIFT_HARD_MAX, 8)
+    shift_constraints = []
+    constraint_settings = d.get("shift_constraints")
+    if constraint_settings is None:
+        # apply default constraints for all employees if no constraints are set
+        return [(default_shift_constraint, e) for e in range(employees)]
+    for setting in constraint_settings:
+        if setting is not None:
+            hard_max = setting.get("max_hours")
+            if not isinstance(hard_max, int):
+                hard_max = SHIFT_HARD_MAX
+            hard_min = min(SHIFT_HARD_MIN, hard_max)
+            # (hard_min, soft_min, min_cost, soft_max, hard_max, max_cost)
+            constraint = (hard_min, 6, 1, 0, hard_max, 8)
+            employee = setting.get("employee")
+            if employee is None:
+                raise Exception("Invalid shift constraint")
+            shift_constraints.append((constraint, employee))
 
-    return shift_constraints, day
+    return shift_constraints
 
 
 def main(_=None):
