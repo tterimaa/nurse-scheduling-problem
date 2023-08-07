@@ -22,7 +22,7 @@ python3 -m pip install -r requirements.txt
 ### Run shift_scheduling.py from command line
 
 ```
-python3 api/shift_scheduling.py 3 "[{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30}]" 0,0,2
+python3 api/shift_scheduling.py 3 "[{\"hours\": 12, \"minutes\": 30, \"shift_constraints\": [{\"max_hours\": 6, \"employee\": 1}]},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30}]" 0,0,2
 ```
 
 ### Run API and use UI

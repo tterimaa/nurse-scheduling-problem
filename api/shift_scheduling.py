@@ -339,7 +339,7 @@ def add_no_gaps_constraint(model, vars):
     return true_to_false, false_to_true
 
 
-def get_hours(day: Day):
+def get_hours(day: Dict):
     hours = day.get("hours")
     if not isinstance(hours, int):
         raise Exception("An hour has a None value " + str(day))
@@ -353,6 +353,7 @@ def get_shift_constraints_for_day(d: Dict, employees: int):
     if constraint_settings is None:
         # apply default constraints for all employees if no constraints are set
         return [(default_shift_constraint, e) for e in range(employees)]
+    # Add day specific constraints
     for setting in constraint_settings:
         if setting is not None:
             hard_max = setting.get("max_hours")
@@ -365,6 +366,11 @@ def get_shift_constraints_for_day(d: Dict, employees: int):
             if employee is None:
                 raise Exception("Invalid shift constraint")
             shift_constraints.append((constraint, employee))
+    # For all employees that don't have special constraints, add default constraints
+    for employee in range(employees):
+        employees_with_constraints = map(lambda x: x[1], shift_constraints)
+        if employee not in employees_with_constraints:
+            shift_constraints.append((default_shift_constraint, employee))
 
     return shift_constraints
 
