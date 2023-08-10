@@ -2,10 +2,7 @@
 
 # TODO LIST
 
-- Offset to max hours per day
-- min_hours to shift constraints
-  - For some days like saturdays hard_min needs to be the lenght of the day
-- Weekly shift constraints (part-time employees)
+- Offset constraint for starting the day later 
 - More granular scheduling
 
 # How to run (macos)

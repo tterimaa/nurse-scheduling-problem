@@ -21,7 +21,7 @@ def endpoint():
 
     num_employees = data.get("num_employees")
     days = data.get("days")
-    constraints = data.get("constraints")
+    constraints = data.get("employee_constraints")
     customer_bookings_input = data.get("bookings")
 
     print(customer_bookings_input)
