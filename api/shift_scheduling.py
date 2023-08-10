@@ -4,6 +4,8 @@ import sys
 import json
 from ortools.sat.python import cp_model
 
+from api.constraints import add_weekly_constraint, get_weekly_constraints_for_employee, get_weekly_hour_variables_for_employee, get_weekly_hour_variables_for_employee
+
 SHIFT_HARD_MIN = 6
 SHIFT_HARD_MAX = 9
 
@@ -11,7 +13,8 @@ SHIFT_HARD_MAX = 9
 def solve_shift_scheduling(
     employees: int,
     days: List[Dict],
-    customer_bookings: List[tuple[int, int, int]],
+    constraints: Dict,
+    customer_bookings: List[tuple[int, int, int]]
 ):
     """Solves the shift scheduling problem."""
     model = cp_model.CpModel()
@@ -28,6 +31,7 @@ def solve_shift_scheduling(
     obj_bool_vars = []
     obj_bool_coeffs = []
 
+    # Build model
     work = {}
     for e in range(employees):
         for i, d in enumerate(days):
@@ -69,28 +73,16 @@ def solve_shift_scheduling(
             workingEmployees.append(work[(e, d, h)])
         model.Add(sum(workingEmployees) >= bookings)
 
+
     # Weekly hour constraints
-    for ct in weekly_hour_constraints:
-        hard_min, soft_min, min_cost, soft_max, hard_max, max_cost = ct
-        for e in range(employees):
-            totalHours = []
-            for i, d in enumerate(days):
-                hours = get_hours(d)
-                for h in range(hours):
-                    totalHours.append(work[(e, i, h)])
-            variables, coeffs = add_soft_sum_constraint(
-                model,
-                totalHours,
-                hard_min,
-                soft_min,
-                min_cost,
-                soft_max,
-                hard_max,
-                max_cost,
-                "weekly_sum_constraint(employee %i, day %i, hour %i)" % (e, i, h),
-            )
-            obj_int_vars.extend(variables)
-            obj_int_coeffs.extend(coeffs)
+    weekly_constraints = constraints["weekly"]
+    for e in range(employees):
+        ct = get_weekly_constraints_for_employee(e, weekly_constraints)
+        totalHours = get_weekly_hour_variables_for_employee(e, days, work)
+        variables, coeffs = add_weekly_constraint(model, ct, totalHours, e)
+        obj_int_vars.extend(variables)
+        obj_int_coeffs.extend(coeffs)
+
 
     # At least one employee works any given hour any given day
     for i, d in enumerate(days):
@@ -378,7 +370,8 @@ def get_shift_constraints_for_day(d: Dict, employees: int):
 def main(_=None):
     employees = json.loads(sys.argv[1])
     days = json.loads(sys.argv[2])
-    customer_bookings = sys.argv[3]
+    constraints = json.loads(sys.argv[3])
+    customer_bookings = sys.argv[4]
 
     print("Days: " + str(days))
     customer_bookings_array = list(map(int, customer_bookings.split(",")))
@@ -390,7 +383,7 @@ def main(_=None):
     ]
     print(customer_bookings_tuple_array)
 
-    solve_shift_scheduling(employees, days, customer_bookings_tuple_array)
+    solve_shift_scheduling(employees, days, constraints, customer_bookings_tuple_array)
 
 
 if __name__ == "__main__":
