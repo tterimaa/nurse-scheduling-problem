@@ -21,12 +21,13 @@ def endpoint():
 
     num_employees = data.get("num_employees")
     days = data.get("days")
-    customer_bookings_input = data.get("customer_bookings")
+    constraints = data.get("constraints")
+    customer_bookings_input = data.get("bookings")
 
     print(customer_bookings_input)
     customer_bookings = list(map(map_function, customer_bookings_input))
     print(customer_bookings)
-    success, res = solve_shift_scheduling(num_employees, days, customer_bookings)
+    success, res = solve_shift_scheduling(num_employees, days, constraints, customer_bookings)
 
     if success is False:
         return jsonify(
