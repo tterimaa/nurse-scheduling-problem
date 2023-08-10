@@ -2,13 +2,10 @@
 
 # TODO LIST
 
-- Daily shift constraints (vacations)
-- shift_constraints input where arbitrary amount of constraints can be defined
-
-  - day, employee, max_hours
-
+- Offset to max hours per day
+- min_hours to shift constraints
+  - For some days like saturdays hard_min needs to be the lenght of the day
 - Weekly shift constraints (part-time employees)
-- Define start and end times for each day
 - More granular scheduling
 
 # How to run (macos)

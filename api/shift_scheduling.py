@@ -4,8 +4,8 @@ import sys
 import json
 from ortools.sat.python import cp_model
 
-SHIFT_HARD_MIN = 3
-SHIFT_HARD_MAX = 10
+SHIFT_HARD_MIN = 6
+SHIFT_HARD_MAX = 9
 
 
 def solve_shift_scheduling(
@@ -19,7 +19,7 @@ def solve_shift_scheduling(
     # Total weekly hours per employee constraints
     weekly_hour_constraints = [
         # (hard_min, soft_min, min_cost, soft_max, hard_max, max_cost)
-        (20, 30, 1, 40, 45, 1)
+        (37, 38, 1, 38, 51, 1)
     ]
 
     # Linear terms of the objective in a minimization context.
@@ -347,7 +347,7 @@ def get_hours(day: Dict):
 
 
 def get_shift_constraints_for_day(d: Dict, employees: int):
-    default_shift_constraint = (SHIFT_HARD_MIN, 6, 1, 0, SHIFT_HARD_MAX, 8)
+    default_shift_constraint = (SHIFT_HARD_MIN, 8, 1, 0, SHIFT_HARD_MAX, 8)
     shift_constraints = []
     constraint_settings = d.get("shift_constraints")
     if constraint_settings is None:
