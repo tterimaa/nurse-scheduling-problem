@@ -2,6 +2,7 @@
 
 # TODO LIST
 
+- If "weekly" constraint setting exist for employee, use that and assume all values exist to simplify constraints
 - Offset constraint for starting the day later 
 - More granular scheduling
 

@@ -6,8 +6,8 @@ from api.utils import get_hours
 
 # Default week constraints
 WEEK_HARD_MAX = 51
-WEEK_HARD_MIN = 37
-WEEK_SOFT_MIN = 0
+WEEK_HARD_MIN = 30
+WEEK_SOFT_MIN = 33
 WEEK_MIN_COST = 1
 WEEK_SOFT_MAX = 38
 WEEK_MAX_COST = 1
@@ -37,12 +37,16 @@ def get_weekly_constraints_for_employee(employee_constraints):
         return DEFAULT_WEEK_CONSTRAINTS
     hard_max = weekly.get("hard_max")
     hard_min = weekly.get("hard_min")
-    hard_max = WEEK_HARD_MAX if hard_max is None else min(WEEK_HARD_MAX, hard_max)
-    hard_min = WEEK_HARD_MIN if hard_min is None else max(WEEK_HARD_MIN, hard_min)
+    hard_max = WEEK_HARD_MAX if hard_max is None else hard_max
+    hard_min = WEEK_HARD_MIN if hard_min is None else hard_min
     hard_min = hard_max if hard_min > hard_max else hard_min
     hard_max = hard_min if hard_max < hard_min else hard_max
+    soft_min = weekly.get("soft_min")
+    soft_min = WEEK_SOFT_MIN if soft_min is None else soft_min
+    soft_max = weekly.get("soft_max")
+    soft_max = WEEK_SOFT_MAX if soft_max is None else soft_max
     # (hard_min, soft_min, min_cost, soft_max, hard_max, max_cost)
-    weekly_hour_constraints = (hard_min, WEEK_SOFT_MIN, WEEK_MIN_COST, WEEK_SOFT_MAX, hard_max, WEEK_MAX_COST)
+    weekly_hour_constraints = (hard_min, soft_min, WEEK_MIN_COST, soft_max, hard_max, WEEK_MAX_COST)
     return weekly_hour_constraints
 
 
@@ -111,7 +115,7 @@ def add_soft_sum_constraint(
 
 # DAILY CONSTRAINTS
 
-# Default week constraints
+# Default daily constraints
 DAY_HARD_MAX = 9
 DAY_HARD_MIN = 6
 DAY_SOFT_MIN = 7
