@@ -1,0 +1,64 @@
+{
+    "num_employees": 3,
+    "days": [
+        {
+        "hours": 12,
+        "minutes": 0
+        },
+        {
+        "hours": 12,
+        "minutes": 0
+        },
+        {
+        "hours": 12,
+        "minutes": 0
+        },
+        {
+        "hours": 12,
+        "minutes": 0
+        },
+        {
+        "hours": 12,
+        "minutes": 0
+        },
+        {
+        "hours": 6,
+        "minutes": 0
+        }
+    ],
+    "employee_constraints": [
+        {
+            "weekly": {},
+            "daily": {
+                "5": {
+                    "hard_max": 0
+                }
+            }
+        },
+        {
+            "weekly": {
+                "hard_max": 30,
+                "hard_min": 20
+            },
+            "daily": {
+                "2": {
+                    "hard_max": 0
+                },
+                "defaults": {}
+            }
+        },
+        {
+            "weekly": {
+                "hard_max": 25
+            },
+            "daily": {}
+        }
+    ],
+    "bookings": [
+        {
+        "day": 0,
+        "hour": 3,
+        "bookings": 1
+        }
+    ]
+}

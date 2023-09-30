@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from shift_scheduling import solve_shift_scheduling
+from api.shift_scheduling import solve_shift_scheduling
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -27,7 +27,9 @@ def endpoint():
     print(customer_bookings_input)
     customer_bookings = list(map(map_function, customer_bookings_input))
     print(customer_bookings)
-    success, res = solve_shift_scheduling(num_employees, days, constraints, customer_bookings)
+    success, res = solve_shift_scheduling(
+        num_employees, days, constraints, customer_bookings
+    )
 
     if success is False:
         return jsonify(
