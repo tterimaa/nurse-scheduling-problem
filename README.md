@@ -2,9 +2,10 @@
 
 # TODO LIST
 
+- Debug the model by printing unsatisfied constraints
+- Design new API interface
 - If "weekly" constraint setting exist for employee, use that and assume all values exist to simplify constraints
 - Offset constraint for starting the day later 
-- More granular scheduling
 
 # How to run (macos)
 
@@ -20,13 +21,10 @@ python3 -m pip install -r requirements.txt
 python3 api/shift_scheduling.py 3 "[{\"hours\": 12, \"minutes\": 30, \"shift_constraints\": [{\"max_hours\": 6, \"employee\": 1}]},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 12, \"minutes\": 30},{\"hours\": 6, \"minutes\": 0}]" "{\"weekly\": [{},{\"hard_max\": 18},{\"hard_max\": 18}]}" 0,0,1
 ```
 
-### Run API and use UI
-
+### Run API
 ```
-python3 routes.py
+python3 -m api.routes
 ```
-
-Open ui/index.html
 
 # CLI parameters
 
