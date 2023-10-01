@@ -1,6 +1,6 @@
 import unittest
 from ortools.sat.python import cp_model
-from api.shift_scheduling import add_no_gaps_constraint
+from model.solver import add_no_gaps_constraint
 
 
 class SolutionPrinter(cp_model.CpSolverSolutionCallback):

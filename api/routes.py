@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from api.shift_scheduling import solve_shift_scheduling
+from model.solver import solve_shift_scheduling
 from flask_cors import CORS
 
 app = Flask(__name__)

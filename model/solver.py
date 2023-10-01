@@ -1,11 +1,18 @@
+import json
+import sys
 from absl import app
 from typing import List, Dict
-import sys
-import json
 from ortools.sat.python import cp_model
 
-from api.constraints import add_daily_hour_constraints, add_weekly_constraint, get_daily_hour_constraints, get_daily_hour_variables_for_employee, get_weekly_constraints_for_employee, get_weekly_hour_variables_for_employee, get_weekly_hour_variables_for_employee
-from api.utils import get_hours
+from .constraints import (
+    add_daily_hour_constraints,
+    add_weekly_constraint,
+    get_daily_hour_constraints,
+    get_daily_hour_variables_for_employee,
+    get_weekly_constraints_for_employee,
+    get_weekly_hour_variables_for_employee,
+)
+from .utils import get_hours
 
 SHIFT_HARD_MIN = 6
 SHIFT_HARD_MAX = 9
@@ -15,7 +22,7 @@ def solve_shift_scheduling(
     employees: int,
     days: List[Dict],
     constraints: List[Dict],
-    customer_bookings: List[tuple[int, int, int]]
+    customer_bookings: List[tuple[int, int, int]],
 ):
     """Solves the shift scheduling problem."""
     model = cp_model.CpModel()
@@ -36,7 +43,7 @@ def solve_shift_scheduling(
 
     # Shift constraints
     for e in range(employees):
-        employee_constraints = constraints[e] 
+        employee_constraints = constraints[e]
         daily_constraints = employee_constraints.get("daily")
         cts = get_daily_hour_constraints(daily_constraints, days)
         for d, day, ct in cts:
@@ -54,7 +61,6 @@ def solve_shift_scheduling(
             workingEmployees.append(work[(e, d, h)])
         model.Add(sum(workingEmployees) >= bookings)
 
-
     # Weekly hour constraints
     for e in range(employees):
         employee_constraints = constraints[e]
@@ -63,7 +69,6 @@ def solve_shift_scheduling(
         variables, coeffs = add_weekly_constraint(model, ct, totalHours, e)
         obj_int_vars.extend(variables)
         obj_int_coeffs.extend(coeffs)
-
 
     # At least one employee works any given hour any given day
     for i, d in enumerate(days):
@@ -136,6 +141,7 @@ def solve_shift_scheduling(
 
     print(solution_found)
     return (solution_found, res)
+
 
 def add_no_gaps_constraint(model, vars):
     # Channeling constraints
